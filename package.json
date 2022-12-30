@@ -1,0 +1,33 @@
+{
+  "name": "screen_recorder",
+  "version": "1.0.0",
+  "description": "Simple cross platform screen recorder",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/amitgouda/screen_recorder.git"
+  },
+  "author": "Amit Kumar Gouda",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amitgouda/screen_recorder/issues"
+  },
+  "homepage": "https://github.com/amitgouda/screen_recorder#readme",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.4",
+    "@electron-forge/maker-deb": "^6.0.4",
+    "@electron-forge/maker-rpm": "^6.0.4",
+    "@electron-forge/maker-squirrel": "^6.0.4",
+    "@electron-forge/maker-zip": "^6.0.4",
+    "electron": "^22.0.0"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}
