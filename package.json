@@ -5,9 +5,12 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron-forge start",
+    "start": "concurrently  \"cross-env BROWSER=none react-scripts start\" \"electron-forge start\"",
+    "start:dev": "nodemon electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "react:dev": "react-scripts start",
+    "react:build": "react-scripts build"
   },
   "repository": {
     "type": "git",
@@ -18,16 +21,33 @@
   "bugs": {
     "url": "https://github.com/amitgouda/screen_recorder/issues"
   },
-  "homepage": "https://github.com/amitgouda/screen_recorder#readme",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.4",
     "@electron-forge/maker-deb": "^6.0.4",
     "@electron-forge/maker-rpm": "^6.0.4",
     "@electron-forge/maker-squirrel": "^6.0.4",
     "@electron-forge/maker-zip": "^6.0.4",
-    "electron": "^22.0.0"
+    "concurrently": "^7.6.0",
+    "electron": "^22.0.0",
+    "nodemon": "^2.0.20",
+    "react-scripts": "^5.0.1"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "cross-env": "^7.0.3",
+    "electron-squirrel-startup": "^1.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

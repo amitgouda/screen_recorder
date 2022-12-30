@@ -105,3 +105,5 @@ dist
 
 #for electron build
 out
+#for react build
+build
