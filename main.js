@@ -19,14 +19,20 @@ const createWindow = () => {
 
   if (isDevelopment) {
     mainWindow.loadURL("http://localhost:3000/");
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
   } else {
     // and load the index.html of the app.
 
     mainWindow.loadURL(
       `file://${path.resolve(__dirname, "/build/", "index.html")}`
     );
+
+
   }
+
+mainWindow.webContents.on('unresponsive',(e)=>{
+  console.log(e,'un responsive')
+})
 
   ipcMain.on(EVENT.INITIATE_CAPTURE, screencapture);
   ipcMain.on(EVENT.SELECT_CAPTURE_SCREEN, handleOnSelectCaptureScreen);
@@ -35,10 +41,7 @@ const createWindow = () => {
     EVENT.HAS_INITIATED_CAPTURE_SCREEN,
     handleOnInitiatedCaptureScreen
   );
-  ipcMain.on(
-    EVENT.HAS_INITIATED_CAPTURE_SCREEN,
-    handleOnInitiatedCaptureScreen
-  );
+ 
 };
 
 // This method will be called when Electron has finished
@@ -97,3 +100,8 @@ const handleOnStopCaptureScreen = () => {
 const handleOnInitiatedCaptureScreen = () => {
   mainWindow.webContents.send(EVENT.HAS_INITIATED_CAPTURE_SCREEN);
 };
+
+ipcMain.on('errorInWindow', function(event, data){
+  console.log(data)
+});
+

@@ -2,7 +2,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 const remote = require("electron").remote;
 
-let stream = null;
+//let stream = null;
 window.addEventListener("DOMContentLoaded", () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector);
@@ -15,34 +15,48 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 ipcRenderer.on("SET_SOURCE", async (event, sourceId) => {
-  console.log("reached");
+  console.log("reached",sourceId);
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
+    const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
         mandatory: {
           chromeMediaSource: "desktop",
           chromeMediaSourceId: sourceId,
-          minWidth: 1280,
+          minWidth: 280,
           maxWidth: 1280,
-          minHeight: 720,
+          minHeight: 120,
           maxHeight: 720,
         },
       },
     });
-    ipcRenderer.sendSync("HAS_INITIATED_CAPTURE_SCREEN");
+    console.log("streaming started");
+   // ipcRenderer.sendSync("HAS_INITIATED_CAPTURE_SCREEN");
 
-    handleStream();
+    handleStream(stream);
   } catch (e) {
     handleError(e);
   }
 });
 
-function handleStream() {
+const getVideoElement = () => {
   const video = document.querySelector("video");
+  return video;
+};
+
+function handleStream(stream) {
+   
+  const video = getVideoElement();
   video.srcObject = stream;
-  video.onloadedmetadata = (e) => video.play();
-return
+  video.autoplay = true
+  video.onplay = (e) => {
+    
+    ipcRenderer.send("HAS_INITIATED_CAPTURE_SCREEN");
+    //video.play();
+  }
+  
+  return; 
+  console.log('handle stream');
   const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
   chunks = [];
   console.log(recorder);
@@ -65,12 +79,12 @@ return
 }
 
 function stopStream() {
-  const video = document.querySelector("video");
+  let video = getVideoElement();
   video.srcObject = null;
 }
 
 function handleError(e) {
-  console.log(e);
+  console.log(e.message);
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -85,16 +99,21 @@ contextBridge.exposeInMainWorld("electronAPI", {
 });
 
 ipcRenderer.on("STOP_CAPTURE_SCREEN", async (event) => {
-  console.log('stopping')
+  console.log("stopping");
+  const video = getVideoElement();
+  const stream = video.srcObject;
   if (stream) {
+    // window.location.reload(false)
+
     console.log(stream);
     stream.getTracks().forEach((track) => {
-      console.log(track.stop)
+      console.log(track.stop);
       track.stop();
     });
-    console.log(stream)
+    console.log(stream);
     stream = null;
   }
+  stopStream();
 });
 
 const download = (audioToSave, fName) => {
@@ -113,3 +132,15 @@ const download = (audioToSave, fName) => {
   window.URL.revokeObjectURL(url);
   document.body.removeChild(a);
 };
+
+
+window.onerror = function(error, url, line) {
+  ipcRenderer.send('errorInWindow', error);
+};
+
+// window.on('unresponsive', function() {
+//   console.log('window crashed');
+// });
+window.onunhandledrejection = (e) =>{
+  console.log(e,'unhandled');
+}
