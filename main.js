@@ -1,13 +1,15 @@
 // main.js
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain, desktopCapturer } = require("electron");
 const isDevelopment = !app.isPackaged;
 const path = require("path");
-
+const EVENT = require("./events");
+let mainWindow = null;
+let availableScreen = [];
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -17,6 +19,7 @@ const createWindow = () => {
 
   if (isDevelopment) {
     mainWindow.loadURL("http://localhost:3000/");
+    mainWindow.webContents.openDevTools();
   } else {
     // and load the index.html of the app.
 
@@ -25,8 +28,17 @@ const createWindow = () => {
     );
   }
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  ipcMain.on(EVENT.INITIATE_CAPTURE, screencapture);
+  ipcMain.on(EVENT.SELECT_CAPTURE_SCREEN, handleOnSelectCaptureScreen);
+  ipcMain.on(EVENT.STOP_CAPTURE_SCREEN, handleOnStopCaptureScreen);
+  ipcMain.on(
+    EVENT.HAS_INITIATED_CAPTURE_SCREEN,
+    handleOnInitiatedCaptureScreen
+  );
+  ipcMain.on(
+    EVENT.HAS_INITIATED_CAPTURE_SCREEN,
+    handleOnInitiatedCaptureScreen
+  );
 };
 
 // This method will be called when Electron has finished
@@ -51,3 +63,37 @@ app.on("window-all-closed", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+// In the main process.
+const screencapture = () => {
+  console.log("capture");
+  desktopCapturer
+    .getSources({ types: ["window", "screen"] })
+    .then(async (sources) => {
+      availableScreen = sources;
+      mainWindow.webContents.send(EVENT.INITIATE_CAPTURE, availableScreen);
+      /* for (const source of sources) {
+      console.log(source.name)
+      if (source.name === 'Entire screen') {
+        mainWindow.webContents.send('SET_SOURCE', source.id)
+        return
+      }
+    } */
+    });
+};
+
+const handleOnSelectCaptureScreen = (e, screenId) => {
+  console.log(availableScreen?.length);
+
+  mainWindow.webContents.send("SET_SOURCE", screenId);
+};
+
+const handleOnStopCaptureScreen = () => {
+  availableScreen = null;
+  console.log('remove screen')
+  mainWindow.webContents.send(EVENT.STOP_CAPTURE_SCREEN);
+};
+
+const handleOnInitiatedCaptureScreen = () => {
+  mainWindow.webContents.send(EVENT.HAS_INITIATED_CAPTURE_SCREEN);
+};
